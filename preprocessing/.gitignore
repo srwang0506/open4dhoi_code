@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+
+# Third-party repos (cloned by setup_third_party.sh or symlinked)
+third_party/
+
+# Model weights in scripts/ (symlinked from shared_data/)
+scripts/J_regressor.pt
+scripts/*.npz

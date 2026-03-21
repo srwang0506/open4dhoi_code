@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4DHOI Data Preparer</title>
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">4D</div>
+      <div class="title">
+        <div class="name">Data Preparer</div>
+        <div class="sub">Upload &bull; Split Scenes &bull; Annotate Point Prompts</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="tabUpload" data-tab="upload">Upload Video</button>
+      <button class="tab" id="tabAnnotate" data-tab="annotate">Annotate Points</button>
+    </div>
+  </header>
+
+  <!-- ==================== Tab 1: Upload ==================== -->
+  <main class="page" id="pageUpload">
+    <section class="content">
+      <div class="panel">
+        <div class="panel-head"><div class="h">1. Video Information</div></div>
+        <div class="form-body">
+          <div class="form-row">
+            <label>Object Category <span class="req">*</span></label>
+            <div class="autocomplete-wrap">
+              <input id="objectCategory" class="input" type="text"
+                     placeholder="e.g. violin, cup (autocomplete supported)" autocomplete="off" />
+              <ul id="categorySuggest" class="autocomplete-list"></ul>
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Local Video File <span class="req">*</span></label>
+            <div id="dropZone" class="drop-zone">
+              <input id="videoFile" type="file" accept=".mp4,.mkv,.avi,.mov,.webm,.flv" hidden />
+              <div class="drop-zone-inner">
+                <span class="drop-icon">+</span>
+                <span class="drop-text">Drag video here or click to select</span>
+                <span id="dropFileName" class="drop-filename"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-head"><div class="h">2. Parse Video</div></div>
+        <div class="form-body">
+          <button id="processBtn" class="btn btn-primary">Parse &amp; Split Scenes</button>
+          <div id="processStatus" class="status"></div>
+        </div>
+
+        <div id="segmentsPanel" class="panel-segments" style="display:none;">
+          <div class="panel-head">
+            <div class="h">3. Select Segments (Max 3)</div>
+            <div class="hint">Click segment card to select/deselect</div>
+          </div>
+          <div id="segmentsList" class="segments-list"></div>
+          <div class="form-body">
+            <button id="saveSegBtn" class="btn btn-ok">Save Selected to Data Directory</button>
+            <div id="saveStatus" class="status"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== Tab 2: Annotate ==================== -->
+  <main class="page" id="pageAnnotate" style="display:none;">
+    <div class="layout">
+      <!-- Sidebar: session list -->
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <div class="h">Sessions</div>
+          <input id="searchQ" class="input input-sm" placeholder="Filter..." />
+          <button id="refreshBtn" class="btn btn-ghost btn-sm">Refresh</button>
+        </div>
+        <div id="sessionList" class="session-list"></div>
+      </aside>
+
+      <!-- Main content -->
+      <section class="content">
+        <div class="panel" id="annotPanel" style="display:none;">
+          <div class="panel-head">
+            <div class="h" id="curTitle">No session selected</div>
+            <div class="meta" id="curMeta"></div>
+          </div>
+
+          <!-- Video player -->
+          <div class="video-wrap">
+            <video id="video" controls preload="metadata" playsinline></video>
+            <canvas id="hiddenCanvas" style="display:none;"></canvas>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <button id="captureBtn" class="btn btn-accent">Capture Frame as Annotation Base</button>
+            <span class="pill">t = <span id="ts">0.000</span>s</span>
+            <button id="selectIndexBtn" class="btn">Select Index Frame</button>
+            <span class="pill">index = <span id="selTs">&mdash;</span>s</span>
+          </div>
+
+          <!-- Annotation area -->
+          <div class="annot">
+            <div class="annot-head">
+              <div class="seg">
+                <button class="seg-btn active" id="ptypeHuman">Human Points</button>
+                <button class="seg-btn" id="ptypeObject">Object Points</button>
+              </div>
+              <button id="undoBtn" class="btn btn-ghost btn-sm">Undo</button>
+              <button id="clearBtn" class="btn btn-ghost btn-sm">Clear</button>
+              <button id="saveAnnoBtn" class="btn btn-ok">Save Annotation</button>
+            </div>
+            <div class="annot-stage" id="annotStage">
+              <img id="annotImg" class="annot-img" />
+              <canvas id="annotCanvas" class="annot-canvas"></canvas>
+              <div class="annot-placeholder" id="annotPlaceholder">
+                Capture a frame first, then click here to place points
+              </div>
+            </div>
+          </div>
+
+          <!-- Toast -->
+          <div class="toast" id="toast"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>

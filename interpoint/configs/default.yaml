@@ -1,0 +1,105 @@
+# InterActVLM-Discrete (IVD) Configuration
+
+# Model Architecture
+model:
+  name: "IVD"
+  d_tr: 256  # Transformer working dimension
+  num_body_points: 87  # Number of body contact points (SMPL-X keypoints)
+  num_obj_queries: 4   # Number of object contact queries (K)
+  num_views: 4         # Number of rendered views (J)
+
+# VLM Module (LLaVA-v1.5 + LoRA)
+vlm:
+  model_name: "llava-hf/llava-1.5-7b-hf"
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  freeze_backbone: true
+  human_token: "<HCON>"
+  object_token: "<OCON>"
+
+# DINOv2 Encoder
+encoder:
+  model_name: "facebook/dinov2-small"  # dinov2_vits14
+  pretrained: true
+  freeze: false
+  output_dim: 384  # ViT-Small output dimension
+
+# Branch Decoder
+decoder:
+  num_layers: 3
+  hidden_dim: 256
+  dropout: 0.1
+  use_skip_connections: true
+
+# Interaction Transformer
+transformer:
+  num_layers: 6
+  num_heads: 8
+  dim_feedforward: 1024
+  dropout: 0.1
+
+# Rendering
+render:
+  image_size: 256
+  num_views: 4
+  view_angles: [0, 90, 180, 270]  # Azimuth angles in degrees
+  elevation: 0
+  use_nocs: true
+  use_normal: true
+
+# Training
+training:
+  batch_size: 8
+  num_epochs: 100
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
+  warmup_epochs: 5
+  
+  # Loss weights
+  lambda_human: 1.0
+  lambda_object: 1.0
+  lambda_aux_mask: 0.5
+  
+  # Training phases
+  phase1_epochs: 20  # Train only decoders with aux mask loss
+  
+  # Optimizer
+  optimizer: "adamw"
+  scheduler: "cosine"
+
+# Data
+data:
+  train_root: "./data/train"
+  val_root: "./data/val"
+  test_root: "./data/test"
+  smplx_model_path: "./data/smplx_models"
+  keypoints_json: "data/part_kp.json"
+  
+  # Image preprocessing
+  image_size: 224
+  render_size: 256
+  
+  # Augmentation
+  use_augmentation: true
+  random_horizontal_flip: true
+  color_jitter: true
+
+# Evaluation
+eval:
+  threshold: 0.5  # Threshold for binary contact prediction
+  chamfer_weight: 1.0
+
+# Logging
+logging:
+  log_dir: "./logs"
+  checkpoint_dir: "./checkpoints"
+  log_every: 100
+  save_every: 5
+  wandb_project: "InterActVLM-Discrete"
+  use_wandb: false
+
+# Device
+device: "cuda"
+num_workers: 4
+seed: 42

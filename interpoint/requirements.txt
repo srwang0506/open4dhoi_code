@@ -1,0 +1,39 @@
+# InterActVLM-Discrete (IVD) Dependencies
+# Install: pip install -r requirements.txt
+
+# Core
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Vision Transformer & VLM
+transformers>=4.36.0
+peft>=0.7.0  # LoRA support
+accelerate>=0.25.0
+
+# 3D Rendering
+# pytorch3d must be built from source, see README
+trimesh>=4.0.0
+
+# Image processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+albumentations>=1.3.0
+
+# Configuration
+omegaconf>=2.3.0
+
+# Logging & Monitoring
+tensorboard>=2.14.0
+tqdm>=4.65.0
+
+# Utilities
+einops>=0.7.0
+timm>=0.9.0
+
+# Metrics
+scikit-learn>=1.3.0
+
+# YAML
+pyyaml>=6.0

@@ -1,0 +1,15 @@
+# Core
+flask>=2.0
+opencv-python>=4.5
+open3d>=0.15
+numpy>=1.21
+PyYAML>=5.4
+scipy>=1.7
+
+# Deep Learning
+torch>=1.12
+smplx>=0.1.28
+
+# Optional: InterPoint model dependencies (only if ivd_model.enabled=true)
+# pillow>=9.0
+# transformers>=4.20

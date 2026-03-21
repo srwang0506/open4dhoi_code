@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+*.pyc
+
+# SMPL-X model files (symlinked from shared_data/)
+video_optimizer/smpl_models/
+video_optimizer/J_regressor.pt
+video_optimizer/smplx_downsampling_1000.npz

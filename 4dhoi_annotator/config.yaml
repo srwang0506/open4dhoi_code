@@ -1,0 +1,35 @@
+# 4DHOI Annotator Configuration
+# Changes require server restart to take effect.
+
+# Annotator name (used for record attribution)
+annotator:
+  name: "anonymous"
+
+# Object mesh decimation (for 3D annotation & optimization)
+mesh:
+  # Target triangle count after decimation; higher = finer detail, slower
+  obj_decimation_target_faces: 60000
+  # Only decimate if vertex count exceeds this threshold
+  obj_decimate_if_vertices_above: 30000
+
+# Server settings
+server:
+  host: "0.0.0.0"
+  port: 5027
+
+# Video defaults (used when metadata is missing)
+video:
+  default_fps: 30
+
+# InterPoint (IVD) model configuration
+# Set enabled=false to run without the auto-prediction model
+ivd_model:
+  enabled: true
+  # Model checkpoint path (leave empty for default)
+  checkpoint: ""
+  # Device: "cuda" or "cpu"
+  device: "cuda"
+  # Prediction confidence threshold
+  threshold: 0.3
+  # Must match training configuration (default: false = full VLM)
+  use_lightweight_vlm: false

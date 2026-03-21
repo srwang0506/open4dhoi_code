@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+
+# CoTracker (external dependency, clone separately)
+co-tracker/
+
+# Shared model data (symlinked from shared_data/)
+asset/data/SMPLX_NEUTRAL.npz
+
+# Solver model files (symlinked from shared_data/)
+solver/J_regressor.pt
+solver/smplx_downsampling_1000.npz
+
+# Demo session data (keep structure, ignore large binary files)
+demo/*/motion/
+demo/*/frames/
+demo/*/mask_dir/
+demo/*/human_mask_dir/
+demo/*/depth.npy
+demo/*/kp_record/
+demo/*/kp_record_merged.json
+demo/*/kp_record_new.json
+demo/*/final_optimized_parameters/
+
+# Runtime
+*.lock
+webapp_locks.json
+.annotating_lock.json
+temp/

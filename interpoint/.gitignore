@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Model checkpoints (download from Google Drive, see README)
+checkpoints/
+
+# SMPL-X model (symlinked from shared_data/)
+smpl_models/
+
+# Wandb logs
+wandb/
+
+# IDE
+.vscode/
+.idea/
