@@ -45,8 +45,16 @@ Interactive web-based annotation tool for 4D Human-Object Interaction (HOI). Ann
 ```bash
 pip install -r requirements.txt
 
-# Install CoTracker
+# Clone and install CoTracker
+git clone https://github.com/facebookresearch/co-tracker.git co-tracker
 cd co-tracker && pip install -e . && cd ..
+```
+
+Download the CoTracker checkpoint:
+```bash
+mkdir -p co-tracker/checkpoints
+# Download scaled_online.pth from https://github.com/facebookresearch/co-tracker#download
+# Place at: co-tracker/checkpoints/scaled_online.pth
 ```
 
 ### 2. Prepare Data
