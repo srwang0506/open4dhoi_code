@@ -40,7 +40,6 @@ interpoint/
 │   └── losses.py              # Loss functions
 │
 ├── data/                      # Dataset and transforms
-│   ├── dataset_4dhoi.py       # 4D-HOI dataset loader
 │   ├── transforms.py          # Image preprocessing
 │   └── part_kp.json           # 87 SMPL-X keypoint definitions
 │
@@ -51,13 +50,6 @@ interpoint/
 ├── configs/
 │   └── default.yaml           # Model configuration
 │
-├── scripts/
-│   ├── train_4dhoi.py         # Training script
-│   ├── evaluate_4dhoi_new.py  # Evaluation script
-│   └── fixed_split_utils.py   # Train/test split utilities
-│
-├── train.sh                   # Training launcher
-├── evaluate.sh                # Evaluation launcher
 └── requirements.txt           # Dependencies
 ```
 
@@ -83,51 +75,26 @@ mkdir -p checkpoints/4dhoi
 # Download and place: checkpoints/4dhoi/epoch_080.pth
 ```
 
-### Train
+### Inference
 
-```bash
-# Train from scratch on 4D-HOI
-bash train.sh
+The model is integrated into the [4dhoi_annotator](../4dhoi_annotator/) as an optional auto-prediction feature. To use it:
 
-# Fine-tune from pretrained checkpoint
-bash train.sh --checkpoint /path/to/pretrained.pth
-```
+1. Place the checkpoint in `checkpoints/`
+2. In `4dhoi_annotator/config.yaml`, set:
+   ```yaml
+   ivd_model:
+     enabled: true
+   ```
+3. The annotator will load the model at startup and provide an "Auto Predict" button
 
-Training parameters (configurable in `train.sh`):
-- Batch size: 24
-- Epochs: 80
-- Learning rate: 3e-5
-- Frame interval: 10 (sample every 10th frame)
-- Test split: 20%
+You can also run inference directly:
 
-### Evaluate
+```python
+from ivd_predictor import IVDPredictor
 
-```bash
-bash evaluate.sh checkpoints/4dhoi/epoch_080.pth
-```
-
-Evaluation metrics:
-- **Human**: Precision, Recall, F1 for 87-way binary classification
-- **Object**: Point-coverage recall (predicted points near GT on object surface)
-- **Interaction**: Pair recall (both human joint and object point correct)
-
-## Data Format
-
-The 4D-HOI dataset expects session directories with:
-
-```
-session_folder/
-├── video.mp4                    # or frames/ directory
-├── obj_init.obj                 # Object mesh (or obj_org.obj)
-├── kp_record_new.json           # Keypoint annotations
-│   {
-│     "00000": {                 # Frame index
-│       "joint_name": vertex_idx,  # Body joint → object vertex
-│       "2D_keypoint": [...]
-│     }
-│   }
-└── motion/
-    └── result_hand.pt           # SMPL-X parameters (for body keypoint positions)
+predictor = IVDPredictor(checkpoint_path="checkpoints/4dhoi/epoch_080.pth")
+predictions = predictor.predict(rgb_frame, object_vertices, threshold=0.3)
+# Returns: [{'joint': 'left_hand', 'xyz': [x,y,z], 'confidence': 0.85}, ...]
 ```
 
 ## Configuration
@@ -136,10 +103,6 @@ Model hyperparameters in `configs/default.yaml`:
 - `d_tr`: Transformer dimension (256)
 - `num_body_points`: Number of human keypoints (87)
 - `num_object_queries`: Number of object surface queries (87)
-
-## Integration with 4DHOI Annotator
-
-This model is used by the [4dhoi_annotator](../4dhoi_annotator/) for automatic interaction point prediction. The annotator's `ivd_predictor.py` wraps this model and expects it at `../interpoint/` relative path.
 
 ## License
 

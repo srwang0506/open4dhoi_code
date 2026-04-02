@@ -23,6 +23,14 @@ shared_data/*.pt
 .DS_Store
 Thumbs.db
 
+# Release assets (for Google Drive upload, not part of repo)
+release_assets/
+
 # Runtime
 *.lock
 temp/
+
+# Local files (not for release)
+release_assets.tar.gz
+/video_optimizer
+*.png

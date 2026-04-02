@@ -17,7 +17,7 @@ import numpy as np
 from sdf import *
 import torch.nn as nn
 try:
-    import neural_renderer.neural_renderer as nr
+    import neural_renderer as nr
 except ImportError:
     nr = None  # Optional dependency; only needed for silhouette rendering
 import torchvision.transforms.functional as TF

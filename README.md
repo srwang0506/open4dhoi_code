@@ -4,6 +4,8 @@
   <img src="assets/teaser.jpg" width="720" />
 </p>
 
+[[Paper (arXiv)]](https://arxiv.org/abs/2512.00960)
+
 End-to-end pipeline for reconstructing 4D Human-Object Interactions from monocular video. With just **a few clicks**, preprocess a video (segmentation, motion, depth, 3D reconstruction), annotate interaction contact points, optimize poses, and render the result — **fast** and **scalable**.
 
 ## Pipeline Overview
@@ -45,7 +47,7 @@ End-to-end pipeline for reconstructing 4D Human-Object Interactions from monocul
 
 ### 1. Download Shared Model Files
 
-All modules share the same SMPL-X body model files. Download once to `shared_data/`:
+All modules share the same SMPL-X body model files. Download from [Google Drive](https://drive.google.com/file/d/1PgASEIlFjSbMTh0x7P9-7rZ1XeMAKzHD/view?usp=sharing) and place in `shared_data/`:
 
 ```bash
 # Required files in shared_data/:
@@ -192,10 +194,16 @@ session_folder/
     └── all_parameters_latest.json
 ```
 
-## License
-
-[TODO: Add license]
-
 ## Citation
 
-[TODO: Add citation]
+```bibtex
+@misc{wen2026efficientscalablemonocularhumanobject,
+      title={Efficient and Scalable Monocular Human-Object Interaction Motion Reconstruction},
+      author={Boran Wen and Ye Lu and Sirui Wang and Keyan Wan and Jiahong Zhou and Junxuan Liang and Xinpeng Liu and Bang Xiao and Ruiyang Liu and Yong-Lu Li},
+      year={2026},
+      eprint={2512.00960},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2512.00960},
+}
+```

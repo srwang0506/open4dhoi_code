@@ -373,10 +373,11 @@ def optimize_single_record(
         print("Cannot read video or video is empty")
         return False
 
-    merged_path = os.path.join(video_dir, "kp_record_new.json")
-    if not os.path.exists(merged_path):
-        print(f"Cannot find merged annotation file: {merged_path}, please save it in the annotation tool first.")
+    # Ensure kp_record_new.json exists (auto-convert from kp_record_merged.json if needed)
+    if not ensure_kp_record_new(video_dir):
+        print("Cannot create kp_record_new.json, terminate optimization")
         return False
+    merged_path = os.path.join(video_dir, "kp_record_new.json")
     with open(merged_path, "r", encoding="utf-8") as f:
         merged = json.load(f)
 
@@ -456,11 +457,6 @@ def optimize_single_record(
                 "right_hand": [[0.0, 0.0, 0.0]] * 15,
             }
         print(f"[INFO] Hand poses: zero fallback for {len(hand_poses)} frames (no hand params in result)")
-
-    # Ensure kp_record_new.json exists (auto-convert from kp_record_merged.json if needed)
-    if not ensure_kp_record_new(video_dir):
-        print("Cannot create kp_record_new.json, terminate optimization")
-        return False
 
     # Use obj_org.obj because kp_record_new.json contains indices on the original mesh
     obj_org_path = os.path.join(video_dir, "obj_org.obj")
