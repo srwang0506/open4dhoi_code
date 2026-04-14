@@ -37,10 +37,10 @@ This clones:
 | Repository | Purpose | Checkpoints Required |
 |------------|---------|---------------------|
 | [SAM2](https://github.com/facebookresearch/sam2) | Video segmentation (step 1) | `sam2.1_hiera_large.pt` |
-| [SAM-3D-Objects](https://github.com/prs-eth/SAM-3D-Objects) | Single-image 3D reconstruction (step 1) | See repo README |
+| [SAM-3D-Objects](https://github.com/facebookresearch/sam-3d-objects) | Single-image 3D reconstruction (step 1) | See repo README |
 | [GVHMR](https://github.com/zju3dv/GVHMR) | Human motion estimation (step 2) | See repo README |
 | [Depth-Anything-V2](https://github.com/DepthAnything/Depth-Anything-V2) | Monocular depth estimation (step 2) | `depth_anything_v2_vitl.pth` |
-| [SAM-3D-Body](https://github.com/prs-eth/SAM-3D-Body) | Hand pose refinement (step 3) | `sam-3d-body-dinov3/model.ckpt` |
+| [SAM-3D-Body](https://github.com/facebookresearch/sam-3d-body) | Hand pose refinement (step 3) | `sam-3d-body-dinov3/model.ckpt` |
 
 After cloning, download the required checkpoints for each model following their respective READMEs. The `config.sh` defaults automatically point to `third_party/`.
 
@@ -174,8 +174,8 @@ The pipeline requires these pre-trained models:
 | Model | Used By | Purpose |
 |-------|---------|---------|
 | [SAM2](https://github.com/facebookresearch/sam2) | Step 1 | Video segmentation |
-| [SAM-3D-Objects](https://github.com/prs-eth/sam-3d-objects) | Step 1 | Single-image 3D reconstruction |
+| [SAM-3D-Objects](https://github.com/facebookresearch/sam-3d-objects) | Step 1 | Single-image 3D reconstruction |
 | [GVHMR](https://github.com/zju3dv/GVHMR) | Step 2 | Human motion estimation |
 | [Depth-Anything-V2](https://github.com/DepthAnything/Depth-Anything-V2) | Step 2 | Monocular depth estimation |
-| [SAM-3D-Body](https://github.com/prs-eth/sam-3d-body) | Step 3 | Hand pose refinement |
+| [SAM-3D-Body](https://github.com/facebookresearch/sam-3d-body) | Step 3 | Hand pose refinement |
 | SMPL-X | Steps 3-4 | Parametric body model |
