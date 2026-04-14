@@ -39,7 +39,7 @@ if [ -d "$TP_DIR/sam-3d-objects" ]; then
     echo "[SAM-3D-Objects] Already exists, skipping."
 else
     echo "[SAM-3D-Objects] Cloning..."
-    git clone https://github.com/prs-eth/SAM-3D-Objects.git "$TP_DIR/sam-3d-objects"
+    git clone https://github.com/facebookresearch/sam-3d-objects.git "$TP_DIR/sam-3d-objects"
 fi
 echo "  Checkpoint needed: see SAM-3D-Objects README for download instructions."
 echo ""
@@ -72,7 +72,7 @@ if [ -d "$TP_DIR/sam-3d-body" ]; then
     echo "[SAM-3D-Body] Already exists, skipping."
 else
     echo "[SAM-3D-Body] Cloning..."
-    git clone https://github.com/prs-eth/SAM-3D-Body.git "$TP_DIR/sam-3d-body"
+    git clone https://github.com/facebookresearch/sam-3d-body.git "$TP_DIR/sam-3d-body"
 fi
 echo "  Checkpoint needed: sam-3d-body-dinov3/model.ckpt"
 echo "  Download from: see SAM-3D-Body README for download instructions."
