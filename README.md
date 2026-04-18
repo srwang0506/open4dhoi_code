@@ -12,24 +12,24 @@ End-to-end pipeline for reconstructing 4D Human-Object Interactions from monocul
 
 ```
                          ┌──────────────────┐
-                         │   data_preparer   │  Upload video, split scenes,
-                         │   (web app)       │  annotate SAM2 point prompts
+                         │   data_preparer  │  Upload video, split scenes,
+                         │   (web app)      │  annotate SAM2 point prompts
                          └────────┬─────────┘
                                   │
                          ┌────────▼─────────┐
-                         │  preprocessing    │  Extract frames, masks, object mesh,
-                         │  (shell scripts)  │  human motion, depth, hand pose, HOI
+                         │  preprocessing   │  Extract frames, masks, object mesh,
+                         │  (shell scripts) │  human motion, depth, hand pose, HOI
                          └────────┬─────────┘
                                   │
               ┌───────────────────┼───────────────────┐
               │                   │                   │
      ┌────────▼─────────┐ ┌──────▼───────┐  ┌────────▼─────────┐
-     │ 4dhoi_annotator   │ │  interpoint  │  │    hoi_solver     │
-     │ (web app)         │ │  (model)     │  │  (optimization)   │
-     │                   │ │              │  │                   │
-     │ 3D annotation +   │ │ Train/eval   │  │ Least-squares +   │
-     │ optional auto-    │ │ contact      │  │ Adam refinement   │
-     │ prediction        │ │ prediction   │  │ + rendering       │
+     │ 4dhoi_annotator  │ │  interpoint  │  │    hoi_solver    │
+     │ (web app)        │ │  (model)     │  │  (optimization)  │
+     │                  │ │              │  │                  │
+     │ 3D annotation +  │ │ Train/eval   │  │ Least-squares +  │
+     │ optional auto-   │ │ contact      │  │ Adam refinement  │
+     │ prediction       │ │ prediction   │  │ + rendering      │
      └──────────────────┘ └──────────────┘  └──────────────────┘
 ```
 
