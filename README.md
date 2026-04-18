@@ -43,6 +43,10 @@ End-to-end pipeline for reconstructing 4D Human-Object Interactions from monocul
 | [4dhoi_annotator](4dhoi_annotator/) | Interactive 3D annotation tool with optional auto-prediction | `python 4dhoi_annotator/app.py` |
 | [hoi_solver](hoi_solver/) | Contact-based pose optimization + rendering | `bash hoi_solver/run.sh` |
 
+## Installation
+
+See [INSTALL.md](INSTALL.md) for environment setup instructions (conda environments, dependencies, and optimization packages).
+
 ## Quick Start
 
 ### 1. Download Shared Model Files
