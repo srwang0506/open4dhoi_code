@@ -64,15 +64,15 @@ pip install -r requirements.txt
 
 ### Download Pretrained Checkpoints
 
-Download from Google Drive and place in `checkpoints/`:
+Download the released InterPoint checkpoint from Hugging Face and place it under `checkpoints/`:
 
 | Checkpoint | Description | Link |
 |------------|-------------|------|
-| `4dhoi/epoch_080.pth` | Trained on 4D-HOI dataset | [Google Drive](TODO) |
+| `4dhoi_contrastive_from_scratch/epoch_078.pth` | Trained on the Open4DHOI release | [Hugging Face](https://huggingface.co/datasets/acane2/Open4DHOI/blob/main/checkpoints/4dhoi_contrastive_from_scratch/epoch_078.pth) |
 
 ```bash
-mkdir -p checkpoints/4dhoi
-# Download and place: checkpoints/4dhoi/epoch_080.pth
+mkdir -p checkpoints/4dhoi_contrastive_from_scratch
+# Download and place: checkpoints/4dhoi_contrastive_from_scratch/epoch_078.pth
 ```
 
 ### Inference
@@ -92,7 +92,7 @@ You can also run inference directly:
 ```python
 from ivd_predictor import IVDPredictor
 
-predictor = IVDPredictor(checkpoint_path="checkpoints/4dhoi/epoch_080.pth")
+predictor = IVDPredictor(checkpoint_path="checkpoints/4dhoi_contrastive_from_scratch/epoch_078.pth")
 predictions = predictor.predict(rgb_frame, object_vertices, threshold=0.3)
 # Returns: [{'joint': 'left_hand', 'xyz': [x,y,z], 'confidence': 0.85}, ...]
 ```
