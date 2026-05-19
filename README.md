@@ -5,6 +5,8 @@
 </p>
 
 [[Paper (arXiv)]](https://arxiv.org/abs/2512.00960)
+[[Dataset (Hugging Face)]](https://huggingface.co/datasets/acane2/Open4DHOI/tree/main)
+[[Annotation Demo Video]](https://youtu.be/sssSdZNHVFc)
 
 End-to-end pipeline for reconstructing 4D Human-Object Interactions from monocular video. With just **a few clicks**, preprocess a video (segmentation, motion, depth, 3D reconstruction), annotate interaction contact points, optimize poses, and render the result — **fast** and **scalable**.
 
