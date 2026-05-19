@@ -125,7 +125,7 @@ bash hoi_solver/run.sh data/category/session_name --render
 ```bash
 cd interpoint
 bash train.sh
-bash evaluate.sh checkpoints/4dhoi/epoch_080.pth
+bash evaluate.sh checkpoints/4dhoi/epoch_078.pth
 ```
 
 ## Project Structure
