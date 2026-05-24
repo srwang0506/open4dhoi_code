@@ -48,6 +48,34 @@ except ImportError as e:
 
 app = Flask(__name__, static_folder='static')
 
+
+def _hand_pose_array_to_list(value):
+    arr = np.asarray(value, dtype=np.float32)
+    if arr.size != 45:
+        raise ValueError(f"Expected 45 SMPL-X hand pose values, got shape {arr.shape}")
+    return arr.reshape(45).tolist()
+
+
+def load_released_hand_poses_npz(video_dir):
+    hand_pose_path = os.path.join(video_dir, 'motion', 'hand_pose.npz')
+    if not os.path.exists(hand_pose_path):
+        return {}
+    data = np.load(hand_pose_path)
+    left = np.asarray(data['left_hand_pose'], dtype=np.float32)
+    right = np.asarray(data['right_hand_pose'], dtype=np.float32)
+    frame_ids = np.asarray(data['frame_ids'], dtype=np.int32) if 'frame_ids' in data.files else np.arange(left.shape[0], dtype=np.int32)
+    if left.ndim != 2 or right.ndim != 2 or left.shape[1] != 45 or right.shape[1] != 45:
+        raise ValueError(f"Invalid hand_pose.npz shapes: left={left.shape}, right={right.shape}")
+    if left.shape != right.shape or frame_ids.shape != (left.shape[0],):
+        raise ValueError(f"Invalid hand_pose.npz frame alignment: left={left.shape}, right={right.shape}, frame_ids={frame_ids.shape}")
+    hand_poses = {}
+    for frame_id, left_pose, right_pose in zip(frame_ids, left, right):
+        hand_poses[str(int(frame_id))] = {
+            'left_hand': _hand_pose_array_to_list(left_pose),
+            'right_hand': _hand_pose_array_to_list(right_pose),
+        }
+    return hand_poses
+
 # ========== Configuration ==========
 
 def _load_config():
@@ -334,6 +362,10 @@ class SceneData:
                     if t_len > 0:
                         print(f"Loaded hand poses from result_hand.pt: {t_len} frames")
                 if not self.hand_poses:
+                    self.hand_poses = load_released_hand_poses_npz(self.video_dir)
+                    if self.hand_poses:
+                        print(f"Loaded hand poses from motion/hand_pose.npz: {len(self.hand_poses)} frames")
+                if not self.hand_poses:
                     # Fallback: zero hand poses
                     zero_count = self.total_frames if self.total_frames > 0 else 0
                     for i in range(zero_count):
@@ -343,7 +375,9 @@ class SceneData:
                         }
                     print(f"Hand poses missing; using zeros for {zero_count} frames")
             else:
-                self.hand_poses = {}
+                self.hand_poses = load_released_hand_poses_npz(self.video_dir)
+                if self.hand_poses:
+                    print(f"Loaded hand poses from motion/hand_pose.npz: {len(self.hand_poses)} frames")
 
             # Load Object Poses (try align/ then output/)
             obj_pose_paths = [

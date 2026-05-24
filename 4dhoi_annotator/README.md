@@ -66,7 +66,8 @@ session_folder/
 ├── video.mp4                    # Input video
 ├── obj_org.obj                  # Object mesh (with optional vertex colors)
 ├── motion/
-│   └── result_hand.pt           # SMPL-X motion parameters (or result.pt)
+│   ├── result_hand.pt           # SMPL-X motion parameters (or result.pt)
+│   └── hand_pose.npz            # Optional SMPL-X hand pose fallback
 └── output/                      # (or align/)
     └── obj_poses.json           # Per-frame object pose (scale, rotation, translation)
 ```

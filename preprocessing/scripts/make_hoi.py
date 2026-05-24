@@ -71,6 +71,35 @@ def _result_hand_pt_path(video_dir: str) -> str:
     return os.path.join(video_dir, "motion", "result_hand.pt")
 
 
+def _hand_pose_npz_path(video_dir: str) -> str:
+    return os.path.join(video_dir, "motion", "hand_pose.npz")
+
+
+def _load_released_hand_pose_tensors(video_dir: str, t_len: int) -> Tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
+    hand_pose_path = _hand_pose_npz_path(video_dir)
+    if not os.path.exists(hand_pose_path):
+        return None, None
+    data = np.load(hand_pose_path)
+    left = np.asarray(data["left_hand_pose"], dtype=np.float32)
+    right = np.asarray(data["right_hand_pose"], dtype=np.float32)
+    frame_ids = np.asarray(data["frame_ids"], dtype=np.int32) if "frame_ids" in data.files else np.arange(left.shape[0], dtype=np.int32)
+    if left.ndim != 2 or right.ndim != 2 or left.shape[1] != 45 or right.shape[1] != 45:
+        raise ValueError(f"Invalid hand_pose.npz shapes: left={left.shape}, right={right.shape}")
+    if left.shape != right.shape or frame_ids.shape != (left.shape[0],):
+        raise ValueError(f"Invalid hand_pose.npz frame alignment: left={left.shape}, right={right.shape}, frame_ids={frame_ids.shape}")
+    left_tensor = torch.zeros((t_len, 45), dtype=torch.float32)
+    right_tensor = torch.zeros((t_len, 45), dtype=torch.float32)
+    loaded = 0
+    for frame_id, left_pose, right_pose in zip(frame_ids, left, right):
+        frame_idx = int(frame_id)
+        if 0 <= frame_idx < t_len:
+            left_tensor[frame_idx] = torch.from_numpy(left_pose.reshape(45))
+            right_tensor[frame_idx] = torch.from_numpy(right_pose.reshape(45))
+            loaded += 1
+    print(f"[INFO] 使用 motion/hand_pose.npz 手部参数: {loaded}/{t_len} frames")
+    return left_tensor, right_tensor
+
+
 def _load_depths(video_dir: str) -> np.ndarray:
     depth_path = os.path.join(video_dir, "depth.npy")
     if not os.path.exists(depth_path):
@@ -353,9 +382,16 @@ def main(args):
     t_len_sub = len(t_indices)
     print(f"[INFO] 降采样: 总帧数 {t_len} -> {t_len_sub} (stride={stride})")
 
-    # 6) 使用 result_hand / result 中的 body_pose、left/right_hand_pose 直接驱动 SMPL-X（无 update_hand_pose）
+    # 6) 使用 result_hand / result / hand_pose.npz 中的 hand pose 直接驱动 SMPL-X（无 update_hand_pose）
     left_hand = global_param.get("left_hand_pose")
     right_hand = global_param.get("right_hand_pose")
+    if left_hand is None or right_hand is None:
+        released_left_hand, released_right_hand = _load_released_hand_pose_tensors(video_dir, t_len)
+        if released_left_hand is not None and released_right_hand is not None:
+            if left_hand is None:
+                left_hand = released_left_hand
+            if right_hand is None:
+                right_hand = released_right_hand
     if left_hand is None:
         left_hand = torch.zeros((t_len, 45))
     if right_hand is None:

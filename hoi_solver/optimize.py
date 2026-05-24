@@ -35,6 +35,35 @@ from video_optimizer.utils.dataset_util import (
     validate_dof_from_merged,
 )
 
+
+
+def _hand_pose_array_to_list(value: Any) -> list[float]:
+    arr = np.asarray(value, dtype=np.float32)
+    if arr.size != 45:
+        raise ValueError(f"Expected 45 SMPL-X hand pose values, got shape {arr.shape}")
+    return arr.reshape(45).tolist()
+
+
+def load_released_hand_poses_npz(video_dir: str) -> Dict[str, Dict[str, list[float]]]:
+    hand_pose_path = os.path.join(video_dir, "motion", "hand_pose.npz")
+    if not os.path.exists(hand_pose_path):
+        return {}
+    data = np.load(hand_pose_path)
+    left = np.asarray(data["left_hand_pose"], dtype=np.float32)
+    right = np.asarray(data["right_hand_pose"], dtype=np.float32)
+    frame_ids = np.asarray(data["frame_ids"], dtype=np.int32) if "frame_ids" in data.files else np.arange(left.shape[0], dtype=np.int32)
+    if left.ndim != 2 or right.ndim != 2 or left.shape[1] != 45 or right.shape[1] != 45:
+        raise ValueError(f"Invalid hand_pose.npz shapes: left={left.shape}, right={right.shape}")
+    if left.shape != right.shape or frame_ids.shape != (left.shape[0],):
+        raise ValueError(f"Invalid hand_pose.npz frame alignment: left={left.shape}, right={right.shape}, frame_ids={frame_ids.shape}")
+    hand_poses = {}
+    for frame_id, left_pose, right_pose in zip(frame_ids, left, right):
+        hand_poses[str(int(frame_id))] = {
+            "left_hand": _hand_pose_array_to_list(left_pose),
+            "right_hand": _hand_pose_array_to_list(right_pose),
+        }
+    return hand_poses
+
 # ============= Path Configuration =============
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -437,7 +466,7 @@ def optimize_single_record(
     with open(resource_path("video_optimizer/data/part_kp.json"), "r", encoding="utf-8") as f:
         human_part = json.load(f)
 
-    # Build hand_poses directly from result (result_hand.pt has left/right_hand_pose); do not use update_hand_pose.
+    # Build hand_poses directly from result_hand.pt, or from released hand_pose.npz.
     hand_poses = {}
     incam = output.get("smpl_params_incam", body_params)
     left_hand = incam.get("left_hand_pose")
@@ -450,13 +479,17 @@ def optimize_single_record(
             }
         print(f"[INFO] Hand poses from result: {len(hand_poses)} frames")
     else:
-        # Fallback: zero hand pose (e.g. old result.pt without hand keys)
-        for i in range(min(total_frames, end_frame_exclusive)):
-            hand_poses[str(i)] = {
-                "left_hand": [[0.0, 0.0, 0.0]] * 15,
-                "right_hand": [[0.0, 0.0, 0.0]] * 15,
-            }
-        print(f"[INFO] Hand poses: zero fallback for {len(hand_poses)} frames (no hand params in result)")
+        hand_poses = load_released_hand_poses_npz(video_dir)
+        if hand_poses:
+            print(f"[INFO] Hand poses from motion/hand_pose.npz: {len(hand_poses)} frames")
+        else:
+            # Fallback: zero hand pose (e.g. old result.pt without hand keys)
+            for i in range(min(total_frames, end_frame_exclusive)):
+                hand_poses[str(i)] = {
+                    "left_hand": [[0.0, 0.0, 0.0]] * 15,
+                    "right_hand": [[0.0, 0.0, 0.0]] * 15,
+                }
+            print(f"[INFO] Hand poses: zero fallback for {len(hand_poses)} frames (no hand params in result or hand_pose.npz)")
 
     # Use obj_org.obj because kp_record_new.json contains indices on the original mesh
     obj_org_path = os.path.join(video_dir, "obj_org.obj")

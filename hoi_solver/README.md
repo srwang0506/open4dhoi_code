@@ -50,6 +50,7 @@ session_folder/
 ├── kp_record_merged.json        # Annotations (from 4dhoi_annotator)
 ├── motion/
 │   ├── result_hand.pt           # SMPL-X params with hands (preferred)
+│   ├── hand_pose.npz            # SMPL-X hand poses only (fallback for old result.pt)
 │   └── result.pt                # SMPL-X params (fallback)
 └── align/ or output/
     └── obj_poses.json           # Object scale and position
