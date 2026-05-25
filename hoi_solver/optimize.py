@@ -63,6 +63,36 @@ def load_released_hand_poses_npz(video_dir: str) -> Dict[str, Dict[str, list[flo
         }
     return hand_poses
 
+
+def ensure_hand_poses_cover_frames(hand_poses: Dict[str, Dict[str, list[float]]], t_len: int) -> Dict[str, Dict[str, list[float]]]:
+    if not hand_poses:
+        return hand_poses
+    missing = []
+    for frame_idx in range(t_len):
+        key = str(frame_idx)
+        if key in hand_poses:
+            continue
+        fallback = None
+        for prev_idx in range(frame_idx - 1, -1, -1):
+            fallback = hand_poses.get(str(prev_idx))
+            if fallback is not None:
+                break
+        if fallback is None:
+            for next_idx in range(frame_idx + 1, t_len):
+                fallback = hand_poses.get(str(next_idx))
+                if fallback is not None:
+                    break
+        if fallback is None:
+            fallback = {
+                "left_hand": [[0.0, 0.0, 0.0]] * 15,
+                "right_hand": [[0.0, 0.0, 0.0]] * 15,
+            }
+        hand_poses[key] = deepcopy(fallback)
+        missing.append(frame_idx)
+    if missing:
+        print(f"[WARN] Filled {len(missing)} missing hand pose frames by nearest fallback: {missing[:5]}{'...' if len(missing) > 5 else ''}")
+    return hand_poses
+
 # ============= Path Configuration =============
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -489,6 +519,8 @@ def optimize_single_record(
                     "right_hand": [[0.0, 0.0, 0.0]] * 15,
                 }
             print(f"[INFO] Hand poses: zero fallback for {len(hand_poses)} frames (no hand params in result or hand_pose.npz)")
+
+    hand_poses = ensure_hand_poses_cover_frames(hand_poses, t_len)
 
     # Prefer internal obj_org.obj; released datasets only include the baked obj_init.obj.
     obj_org_path = os.path.join(video_dir, "obj_org.obj")
