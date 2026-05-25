@@ -14,7 +14,6 @@ import argparse
 import fcntl
 import json
 import os
-os.environ['CUDA_VISIBLE_DEVICES']='2'
 import signal
 import sys
 import time
@@ -491,16 +490,11 @@ def optimize_single_record(
                 }
             print(f"[INFO] Hand poses: zero fallback for {len(hand_poses)} frames (no hand params in result or hand_pose.npz)")
 
-    # Use obj_org.obj because kp_record_new.json contains indices on the original mesh
+    # Prefer internal obj_org.obj; released datasets only include the baked obj_init.obj.
     obj_org_path = os.path.join(video_dir, "obj_org.obj")
-    if not os.path.exists(obj_org_path):
-        print(f"Cannot find obj_org.obj: {obj_org_path}")
-        return False
+    obj_init_path = os.path.join(video_dir, "obj_init.obj")
 
-    obj_org_raw = o3d.io.read_triangle_mesh(obj_org_path)
-    print(f"[INFO] Loaded obj_org.obj with {len(obj_org_raw.vertices)} vertices")
-
-    # Load obj_poses.json to get scale and other parameters
+    # Load obj_poses.json to get scale and other parameters when obj_org.obj is available.
     obj_poses_path = os.path.join(video_dir, "align", "obj_poses.json")
     if not os.path.exists(obj_poses_path):
         # Try output directory as fallback
@@ -513,8 +507,20 @@ def optimize_single_record(
         print(f"[WARN] obj_poses.json not found, using default scale=1.0")
         obj_poses_data = {"scale": 1.0}
 
-    # Preprocess mesh to match annotation app (apply scale, recenter, apply object_scale)
-    obj_org = preprocess_obj_for_optimization(obj_org_raw, obj_poses_data, merged)
+    if os.path.exists(obj_org_path):
+        obj_org_raw = o3d.io.read_triangle_mesh(obj_org_path)
+        print(f"[INFO] Loaded obj_org.obj with {len(obj_org_raw.vertices)} vertices")
+        # Preprocess mesh to match annotation app (apply scale, recenter, apply object_scale).
+        obj_org = preprocess_obj_for_optimization(obj_org_raw, obj_poses_data, merged)
+        saved_object_path = obj_org_path
+    elif os.path.exists(obj_init_path):
+        obj_org = o3d.io.read_triangle_mesh(obj_init_path)
+        print(f"[INFO] Loaded released obj_init.obj directly with {len(obj_org.vertices)} vertices")
+        saved_object_path = obj_init_path
+    else:
+        print(f"Cannot find object mesh: {obj_org_path} or {obj_init_path}")
+        return False
+
     sampled_obj = obj_org.simplify_quadric_decimation(target_number_of_triangles=1000)
 
     seq_len = end_frame_exclusive - start_frame
@@ -597,10 +603,8 @@ def optimize_single_record(
         global_subset["global_orient"].append(_to_list(output["smpl_params_global"]["global_orient"][fi]))
         global_subset["transl"].append(_to_list(output["smpl_params_global"]["transl"][fi]))
 
-    original_object_path = os.path.join(video_dir, "obj_org.obj")
-    if not os.path.isfile(original_object_path):
-        raise FileNotFoundError(f"Object mesh not found: {original_object_path}")
-    saved_object_path = original_object_path
+    if not os.path.isfile(saved_object_path):
+        raise FileNotFoundError(f"Object mesh not found: {saved_object_path}")
     transformed_summary = {
         "object_mesh_path": saved_object_path,
         "note": "No transformed_parameters saved. Render should compute R_total/T_total from raw object params + camera subsets for consistency with preview."

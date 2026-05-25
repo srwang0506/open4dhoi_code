@@ -16,6 +16,12 @@ from math import exp
 import numpy as np
 from sdf import *
 import torch.nn as nn
+import sys
+from pathlib import Path
+
+_NEURAL_RENDERER_ROOT = Path(__file__).resolve().parents[2] / "neural_renderer"
+if _NEURAL_RENDERER_ROOT.is_dir():
+    sys.path.insert(0, str(_NEURAL_RENDERER_ROOT))
 import neural_renderer as nr
 import torchvision.transforms.functional as TF
 from pytorch3d.ops import knn_points
@@ -300,7 +306,8 @@ def compute_mask_loss(width, height, video_dir, hverts, overts, hfaces, ofaces, 
     i = frame_idx 
 
     render_size = max(downsample_height, downsample_width)  # Use max to be safe
-    renderer = nr.renderer.Renderer(
+    renderer_cls = getattr(getattr(nr, "renderer", None), "Renderer", None) or nr.Renderer
+    renderer = renderer_cls(
         image_size=render_size,
         K=K_nf.unsqueeze(0),
         R=R,

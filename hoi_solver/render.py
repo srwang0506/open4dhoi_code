@@ -379,41 +379,24 @@ def main():
         Image.fromarray(img).save(path, optimize=False)
         frame_paths.append(path)
     out_path = os.path.join(args.data_dir, args.out)
+    # Use OpenCV for broad environment compatibility; some imageio/imageio-ffmpeg
+    # combinations pass unsupported kwargs such as audio_path to write_frames().
+    import importlib
+    cv2 = importlib.import_module('cv2')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    first = cv2.imread(frame_paths[0])
+    if first is None:
+        raise RuntimeError(f"Failed to read first frame: {frame_paths[0]}")
+    h, w = first.shape[:2]
+    vw = cv2.VideoWriter(out_path, fourcc, float(args.fps), (w, h))
     try:
-        import importlib
-        imageio = importlib.import_module('imageio.v2')
-
-        writer = imageio.get_writer(
-            out_path,
-            fps=args.fps,
-            format='FFMPEG',
-            codec='libx264',
-            ffmpeg_params=['-pix_fmt', 'yuv420p', '-crf', '18'],
-        )
-        try:
-            for p in tqdm(frame_paths, desc='Writing video'):
-                img = imageio.imread(p)
-                writer.append_data(img)
-        finally:
-            writer.close()
-    except ModuleNotFoundError:
-        # Fallback: write video using OpenCV if imageio is not available.
-        import importlib
-        cv2 = importlib.import_module('cv2')
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        first = cv2.imread(frame_paths[0])
-        if first is None:
-            raise RuntimeError(f"Failed to read first frame: {frame_paths[0]}")
-        h, w = first.shape[:2]
-        vw = cv2.VideoWriter(out_path, fourcc, float(args.fps), (w, h))
-        try:
-            for p in tqdm(frame_paths, desc='Writing video (cv2)'):
-                fr = cv2.imread(p)
-                if fr is None:
-                    continue
-                vw.write(fr)
-        finally:
-            vw.release()
+        for p in tqdm(frame_paths, desc='Writing video'):
+            fr = cv2.imread(p)
+            if fr is None:
+                raise RuntimeError(f"Failed to read rendered frame: {p}")
+            vw.write(fr)
+    finally:
+        vw.release()
 
     print("Render complete. Video saved to:", out_path)
 
