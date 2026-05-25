@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import smplx
 import argparse
+from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
 # renderer & utilities from project
@@ -57,7 +58,7 @@ def main():
     parser.add_argument('--transformed_out', default=None, help='output path for transformed parameters json; default: <data_dir>/final_optimized_parameters/transformed_parameters_final.json')
     parser.add_argument('--ground_align', choices=['miny', 'none'], default='none', help='how to align scene with y=0 ground plane (default: none)')
     parser.add_argument('--target_center_height', default='auto', help='turntable camera target y height; use auto to center the scene bbox')
-    parser.add_argument('--smpl_model', default='video_optimizer/smpl_models/SMPLX_NEUTRAL.npz')
+    parser.add_argument('--smpl_model', default=None, help='SMPL-X model path; default: hoi_solver/video_optimizer/smpl_models/SMPLX_NEUTRAL.npz')
     parser.add_argument('--width', type=int, default=1024)
     parser.add_argument('--height', type=int, default=1024)
     parser.add_argument('--fps', type=int, default=30)
@@ -65,6 +66,16 @@ def main():
     parser.add_argument('--start_frame', type=int, default=None, help='optional absolute start frame (inclusive)')
     parser.add_argument('--end_frame_exclusive', type=int, default=None, help='optional absolute end frame (exclusive)')
     args = parser.parse_args()
+
+    script_dir = Path(__file__).resolve().parent
+    if args.smpl_model is None:
+        args.smpl_model = str(script_dir / 'video_optimizer' / 'smpl_models' / 'SMPLX_NEUTRAL.npz')
+    else:
+        smpl_model_path = Path(args.smpl_model)
+        if not smpl_model_path.is_absolute() and not smpl_model_path.exists():
+            script_relative = script_dir / smpl_model_path
+            if script_relative.exists():
+                args.smpl_model = str(script_relative)
 
     fop_dir = os.path.join(args.data_dir, 'final_optimized_parameters')
     if not os.path.isdir(fop_dir):

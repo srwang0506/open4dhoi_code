@@ -120,6 +120,16 @@ python 4dhoi_annotator/app.py --data_dir data --port 5027
 bash hoi_solver/run.sh data/category/session_name --render
 ```
 
+To reproduce optimization on a released Open4DHOI dataset session, pass the downloaded session folder directly:
+
+```bash
+conda run -n 4dhoi_pipeline bash hoi_solver/run.sh \
+  "/path/to/Open4DHOI/self_data/pass/badminton racket/20250917_202002" \
+  --render --gpu 0
+```
+
+See [hoi_solver/README.md](hoi_solver/README.md#open4dhoi-release-reproduction) for the expected released-data layout, quick sanity-check command, and output files.
+
 ### 7. Train InterPoint Model (Optional)
 
 ```bash

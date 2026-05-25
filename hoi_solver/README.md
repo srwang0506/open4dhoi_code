@@ -42,19 +42,56 @@ bash run.sh /path/to/session --start_frame 0 --end_frame 50
 
 ## Input Requirements
 
-The session directory must contain:
+The solver supports both the full preprocessing layout and the released Open4DHOI dataset layout.
+
+Full pipeline session:
 ```
 session_folder/
 ├── video.mp4                    # Input video
 ├── obj_org.obj                  # Original object mesh
-├── kp_record_merged.json        # Annotations (from 4dhoi_annotator)
+├── kp_record_merged.json        # Annotations from 4dhoi_annotator
 ├── motion/
 │   ├── result_hand.pt           # SMPL-X params with hands (preferred)
 │   ├── hand_pose.npz            # SMPL-X hand poses only (fallback for old result.pt)
-│   └── result.pt                # SMPL-X params (fallback)
+│   └── result.pt                # SMPL-X params
 └── align/ or output/
     └── obj_poses.json           # Object scale and position
 ```
+
+Released Open4DHOI session:
+```
+session_folder/
+├── video.mp4                    # Input video
+├── obj_init.obj                 # Released object mesh, already preprocessed
+├── kp_record_new.json           # Contact annotations on obj_init.obj
+├── mask_dir/                    # Object masks for Adam mask loss
+├── human_mask_dir/              # Human masks for Adam mask loss
+└── motion/
+    ├── result.pt                # SMPL-X body params
+    └── hand_pose.npz            # Released SMPL-X hand pose params, shape [T, 45] per hand
+```
+
+For released sessions, `optimize.py` uses `obj_init.obj` directly when `obj_org.obj` is absent, uses `kp_record_new.json` directly when present, and loads `motion/hand_pose.npz` when `motion/result_hand.pt` is absent. If a session has one fewer hand-pose frame than motion frame, the missing frame is filled from the nearest available frame so the optimizer can still run end-to-end.
+
+## Open4DHOI Release Reproduction
+
+After downloading a session from [acane2/Open4DHOI](https://huggingface.co/datasets/acane2/Open4DHOI/tree/main), run the optimizer from the repository root:
+
+```bash
+conda run -n 4dhoi_pipeline bash hoi_solver/run.sh \
+  "/path/to/Open4DHOI/self_data/pass/badminton racket/20250917_202002" \
+  --render --gpu 0
+```
+
+For a quick sanity check before a full run, optimize only a short range with least squares:
+
+```bash
+conda run -n 4dhoi_pipeline bash hoi_solver/run.sh \
+  "/path/to/Open4DHOI/self_data/pass/badminton racket/20250917_202002" \
+  --use_least_squares_only --start_frame 0 --end_frame 20 --render --gpu 0
+```
+
+The full Adam run is slower but gives the final released-style result. On the badminton-racket example above, the 301-frame Adam optimization takes about 50 minutes on one high-end GPU. `optimized_preview.mp4` is the in-camera preview for checking pose/contact quality; `output_render.mp4` is the global turntable render with an auto-centered camera.
 
 ## Output
 
