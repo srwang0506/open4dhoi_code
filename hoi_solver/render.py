@@ -56,6 +56,7 @@ def main():
     parser.add_argument('--save_transformed_params', action='store_true', help='save cam->global transformed params JSON (human/object) in transformed_parameters_final.json style')
     parser.add_argument('--transformed_out', default=None, help='output path for transformed parameters json; default: <data_dir>/final_optimized_parameters/transformed_parameters_final.json')
     parser.add_argument('--ground_align', choices=['miny', 'none'], default='none', help='how to align scene with y=0 ground plane (default: none)')
+    parser.add_argument('--target_center_height', default='auto', help='turntable camera target y height; use auto to center the scene bbox')
     parser.add_argument('--smpl_model', default='video_optimizer/smpl_models/SMPLX_NEUTRAL.npz')
     parser.add_argument('--width', type=int, default=1024)
     parser.add_argument('--height', type=int, default=1024)
@@ -355,11 +356,19 @@ def main():
     verts_glob = combined_verts
     
 
+    if args.target_center_height == 'auto':
+        y_min = verts_glob[..., 1].min().item()
+        y_max = verts_glob[..., 1].max().item()
+        target_center_height = 0.5 * (y_min + y_max)
+        print(f"[render] target_center_height=auto -> {target_center_height:.6f} (bbox y: {y_min:.6f}..{y_max:.6f})")
+    else:
+        target_center_height = float(args.target_center_height)
+
     global_R, global_T, global_lights = get_global_cameras_static(
         verts_glob.cpu(),
         beta=2.5,
         cam_height_degree=20,
-        target_center_height=1.0,
+        target_center_height=target_center_height,
         vec_rot=180
     )
 
